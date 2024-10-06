@@ -17,6 +17,10 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full history for better SonarQube analysis
 
+      - name: Wait for 30 seconds
+        run: sleep 30
+
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:

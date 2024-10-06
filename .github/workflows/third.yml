@@ -33,12 +33,12 @@ jobs:
           sonar-scanner \
           -Dsonar.projectKey=test \
           -Dsonar.sources=. \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.host.url=${{ secrets.EC2_PUBLIC_IP }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
       - name: Download SonarQube Report (JSON)
         run: |
           curl -u ${{ secrets.SONAR_TOKEN }}: \
-          "http://${{ secrets.SONAR_HOST_URL }}:9000/api/issues/search?projectKey=test" \
+          "http://${{ secrets.EC2_PUBLIC_IP }}:9000/api/issues/search?projectKey=test" \
           -o sonarqube-report.json
       - name: Prettify JSON Report
         run: |

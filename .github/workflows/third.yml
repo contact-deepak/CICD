@@ -1,0 +1,50 @@
+name: third
+
+on:
+  workflow_run:
+    workflows: ["second"] 
+    types:
+      - completed  
+
+
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full history for better SonarQube analysis
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Adjust based on your project's requirements
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install SonarQube Scanner
+        run: npm install -g sonarqube-scanner
+
+      - name: Run SonarQube Scan
+        run: |
+          sonar-scanner \
+          -Dsonar.projectKey=test \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Download SonarQube Report (JSON)
+        run: |
+          curl -u ${{ secrets.SONAR_TOKEN }}: \
+          "http://${{ secrets.SONAR_HOST_URL }}:9000/api/issues/search?projectKey=test" \
+          -o sonarqube-report.json
+      - name: Prettify JSON Report
+        run: |
+          cat sonarqube-report.json | jq '.' > pretty-sonarqube-report.json
+      - name: Upload Pretty Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pretty-sonarqube-report
+          path: pretty-sonarqube-report.json

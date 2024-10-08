@@ -39,16 +39,30 @@ jobs:
           -Dsonar.sources=. \
           -Dsonar.host.url=http://${{ secrets.EC2_PUBLIC_IP }}:9000 \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-      - name: Download SonarQube Report (JSON)
+      - name: Fetch Full List of Issues from SonarQube
         run: |
           curl -u ${{ secrets.SONAR_TOKEN }}: \
-          "http://${{ secrets.EC2_PUBLIC_IP }}:9000/api/issues/search?projectKey=demo" \
-          -o sonarqube-report.json
-      - name: Prettify JSON Report
+          "http://${{ secrets.EC2_PUBLIC_IP }}:9000/api/issues/search?componentKeys=demo&types=BUG,VULNERABILITY,CODE_SMELL" \
+          -o sonarqube_issues.json
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+ 
+      - name: Fetch Project Metrics Report from SonarQube
         run: |
-          cat sonarqube-report.json | jq '.' > pretty-sonarqube-report.json
-      - name: Upload Pretty Report as Artifact
+          curl -u ${{ secrets.SONAR_TOKEN }}: \
+          "http://${{ secrets.EC2_PUBLIC_IP }}:9000/api/measures/component?component=demo&metricKeys=coverage,bugs,vulnerabilities,code_smells,duplicated_lines_density" \
+          -o sonarqube_metrics.json
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload Issues Report as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: pretty-sonarqube-report
-          path: pretty-sonarqube-report.json
+          name: sonarqube-issues
+          path: sonarqube_issues.json
+
+      - name: Upload Metrics Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sonarqube-metrics
+          path: sonarqube_metrics.json

@@ -39,6 +39,7 @@ jobs:
           -Dsonar.sources=. \
           -Dsonar.host.url=http://${{ secrets.EC2_PUBLIC_IP }}:9000 \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          
       - name: Fetch Full List of Issues from SonarQube
         run: |
           curl -u ${{ secrets.SONAR_TOKEN }}: \
@@ -46,6 +47,12 @@ jobs:
           -o sonarqube_issues.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload Pretty Printed Issues Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sonarqube-issues-pretty
+          path: sonarqube_issues_pretty.json    
 
       - name: Upload Issues Report as Artifact
         uses: actions/upload-artifact@v3
@@ -74,4 +81,4 @@ jobs:
           to: ${{ secrets.RECIPIENT_EMAIL }}
           from: ${{ secrets.SMTP_USERNAME }}
           secure: true
-          attachments: sonarqube_issues.json
+          attachments: sonarqube_issues_pretty.json

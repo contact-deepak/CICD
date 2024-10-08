@@ -46,23 +46,32 @@ jobs:
           -o sonarqube_issues.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
- 
-      - name: Fetch Project Metrics Report from SonarQube
-        run: |
-          curl -u ${{ secrets.SONAR_TOKEN }}: \
-          "http://${{ secrets.EC2_PUBLIC_IP }}:9000/api/measures/component?component=demo&metricKeys=coverage,bugs,vulnerabilities,code_smells,duplicated_lines_density" \
-          -o sonarqube_metrics.json
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload Issues Report as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: sonarqube-issues
           path: sonarqube_issues.json
-
-      - name: Upload Metrics Report as Artifact
-        uses: actions/upload-artifact@v3
+          
+      - name: Send email on success or failure
+        if: always()  # ensures that this step runs no matter what
+        uses: dawidd6/action-send-mail@v3
         with:
-          name: sonarqube-metrics
-          path: sonarqube_metrics.json
+          server_address: ${{ secrets.SMTP_SERVER }}   # smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}      # app password from google account
+          subject: "GitHub Action Pipeline Status - ${{ job.status }}"
+          body: |
+            The GitHub Action for your project has completed.
+          
+            Status: ${{ job.status }} 
+            Commit: ${{ github.sha }}
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+
+            Check the details at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: ${{ secrets.RECIPIENT_EMAIL }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          secure: true
+          attachments: sonarqube_issues.json

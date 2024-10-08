@@ -17,9 +17,8 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full history for better SonarQube analysis
 
-      - name: Wait for 30 seconds
-        run: sleep 30
-
+      - name: Wait for 20 seconds
+        run: sleep 20
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -39,6 +38,9 @@ jobs:
           -Dsonar.sources=. \
           -Dsonar.host.url=http://${{ secrets.EC2_PUBLIC_IP }}:9000 \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+      - name: Wait for 20 seconds
+        run: sleep 20    
           
       - name: Fetch Full List of Issues from SonarQube
         run: |

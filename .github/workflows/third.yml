@@ -53,12 +53,6 @@ jobs:
         with:
           name: sonarqube-issues-pretty
           path: sonarqube_issues_pretty.json    
-
-      - name: Upload Issues Report as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: sonarqube-issues
-          path: sonarqube_issues.json
           
       - name: Send email on success or failure
         if: always()  # ensures that this step runs no matter what

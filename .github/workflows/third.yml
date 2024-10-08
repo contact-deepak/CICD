@@ -48,11 +48,15 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Upload Pretty Printed Issues Report as Artifact
+      - name: Prettify JSON Report
+        run: |
+          cat sonarqube_issues.json | jq '.' > sonarqube-report.json
+
+      - name: Upload Pretty Report as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sonarqube-issues-pretty
-          path: sonarqube_issues_pretty.json    
+          name: sonarqube-report
+          path: sonarqube-report.json    
           
       - name: Send email on success or failure
         if: always()  # ensures that this step runs no matter what
@@ -75,4 +79,4 @@ jobs:
           to: ${{ secrets.RECIPIENT_EMAIL }}
           from: ${{ secrets.SMTP_USERNAME }}
           secure: true
-          attachments: sonarqube_issues_pretty.json
+          attachments: sonarqube-report.json

@@ -14,10 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Get Public IP
-        id: get-ip
+      - name: Get public IP address
         run: |
-          echo "RUNNER_IP=$(curl -s ifconfig.me)" >> $GITHUB_ENV  
+          echo "Public IP Address:"
+          curl ifconfig.me 
 
       - name: Wait for 20 seconds
         run: sleep 20
